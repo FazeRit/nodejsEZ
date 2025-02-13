@@ -42,7 +42,7 @@ header ul
 }
 header a{
     color: transparent;
-    background-image: url('./img/goldjpeg.jpeg');
+    background-image: url('/nodejsEZ/lab2/public/images/goldjpeg.jpeg');
     background-size: cover;
     background-clip: text;
     font-family: "Oswald", sans-serif;
@@ -100,7 +100,7 @@ main{
 }
 .third_block div, .button_1
 {
-    background-image: url('./img/header.jpg');
+    background-image: url('/nodejsEZ/lab2/public/images/header.jpg');
     background-size: cover;
 }
 .third_block div{
@@ -113,20 +113,6 @@ main{
     background-color: rgba(0, 0, 0, 0.7);
     width: 20rem;
 }
-.button_1{
-    border: solid whitesmoke;
-    width: 10rem;
-    cursor: pointer;
-    margin-bottom: 10%;
-    padding: 20px;
-    justify-content: center;
-    text-decoration: none;
-    z-index: 2;
-}
-.button_1:hover {
-    transform: scale(1.05);
-}
-
 .img1_1
 {
     width: 15rem;
@@ -166,7 +152,7 @@ footer
     {
         margin-left: -3rem;
         margin-top: 5px;
-        background-image: url('./img/goldjpeg.jpeg');
+        background-image: url('/nodejsEZ/lab2/public/images/goldjpeg.jpeg');
         background-size: cover;
         width: 25px;
         height: 3px;
