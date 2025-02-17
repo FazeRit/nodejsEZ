@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daniil Yevstafiev | About</title>
+
+    <title><%= member.name %> | About</title>
 
     <link rel="icon" type="image/svg" href="../images/logo.svg" />
 
-    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,22 +36,19 @@
     <main class="flexbox">
       <div class="double flexbox">
         <div class="second_block flexbox">
-          <img class="img2_1" src="../images/daniilGitHub.png" />
+          <img class="img2_1" src="<%= member.img %>" />
         </div>
         <div class="third_block flexbox">
           <div>
-            <h1>Daniil Yevstafiev</h1>
-            <p>
-              Beginner web developer, 19 y.o, studying at university, 2nd year
-              of study
-            </p>
+            <h1><%= member.name %></h1>
+            <p><%= member.description %></p>
           </div>
         </div>
       </div>
     </main>
     <footer>
       <button class="git">
-        <a href="https://github.com/Danillkerr">
+        <a href="<%= member.gitHub %>">
           <img src="../images/gitHub.svg" alt="GitHub" />
         </a>
       </button>
