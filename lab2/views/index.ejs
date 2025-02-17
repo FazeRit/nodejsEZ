@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Наша команда</title>
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Welcome!</h1>
+      <h2>Meet our team:</h2>
+      <ul>
+        <% teamMembers.forEach(member => { %>
+        <li>
+          <a href="/team/<%= member.id %>"> <%= member.name %> </a>
+          (<%= member.dynamic ? "EJS" : "HTML" %>)
+        </li>
+        <% }); %>
+      </ul>
+    </div>
+  </body>
+</html>
