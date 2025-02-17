@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { MEMBERS_PAGES } from "../config/teamMembers.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,25 +20,8 @@ router.get("/team/3", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/html/eldar.html"));
 });
 
-const teamMembers = [
-  {
-    id: 4,
-    name: "Bogdan Pyata",
-    img: "/images/bogdanGitHub.png",
-    description: "Bogdan supremacy.",
-    gitHub: "https://github.com/Gertyul",
-  },
-  {
-    id: 5,
-    name: "Angelina Vashchenko",
-    img: "/images/angelinaGitHub.png",
-    description: "Angelina.",
-    gitHub: "https://github.com/Anhelina06",
-  },
-];
-
 router.get("/team/:id", (req, res) => {
-  const member = teamMembers.find((m) => m.id === parseInt(req.params.id));
+  const member = MEMBERS_PAGES.find((m) => m.id === parseInt(req.params.id));
   if (member) {
     res.render("team-member", { member });
   } else {
