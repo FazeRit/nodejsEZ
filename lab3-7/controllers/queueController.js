@@ -1,90 +1,161 @@
-import {
-  getAllQueues as _getAllQueues,
-  getQueueById as _getQueueById,
-  createQueue as _createQueue,
-  joinQueue as _joinQueue,
-  getUserPosition as _getUserPosition,
-  nextInQueue as _nextInQueue,
-  removeUserFromQueue as _removeUserFromQueue,
-  closeQueue as _closeQueue,
-} from "../services/queueService.js";
-import { getUserById } from "../repositories/userRepository.js";
+/**
+ * @fileoverview Шар контролерів для системи "Електронна черга".
+ *
+ * @description
+ * Цей модуль обробляє HTTP-запити, пов’язані з управлінням чергами. Він взаємодіє з шаром сервісів для виконання операцій
+ * і відображає сторінки через шаблони EJS для генерації HTML-відповідей на сервері.
+ *
+ * Реалізовані ендпоінти:
+ * - GET /queues: Повертає список усіх черг.
+ * - GET /queues/:id: Показує деталі конкретної черги.
+ * - POST /queues: Створює нову чергу.
+ * - POST /queues/:id/join: Дозволяє користувачу приєднатися до черги.
+ * - GET /queues/:id/my-position: Показує позицію користувача в черзі.
+ * - POST /queues/:id/next: Просуває чергу, видаляючи першого користувача (тільки власник).
+ * - POST /queues/:id/remove/:userId: Видаляє конкретного користувача з черги (тільки власник).
+ * - POST /queues/:id/close: Закриває чергу, забороняючи подальші приєднання (тільки власник).
+ *
+ * @module controllers/queueController
+ *
+ * @requires ../services/queueService.js - Сервісний шар для логіки управління чергами.
+ * @requires ../repositories/userRepository.js - Репозиторій для доступу до даних користувачів.
+ *
+ * @author [Ваше Ім’я]
+ * @date 2025-02-27
+ */
 
-export function getAllQueues(req, res) {
-  const queues = _getAllQueues();
+import * as queueService from "../services/queueService.js";
+import * as userRepository from "../repositories/userRepository.js";
+
+/**
+ * Обробляє GET /queues: Відображає список усіх черг.
+ * @param {Object} req - Об’єкт запиту Express.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Рендерить шаблон 'queues' зі списком черг.
+ */
+export const getAllQueues = (req, res) => {
+  const queues = queueService.getAllQueues();
   res.render("queues", { queues });
-}
+};
 
-export function getQueueById(req, res) {
-  const queue = _getQueueById(parseInt(req.params.id));
+/**
+ * Обробляє GET /queues/:id: Відображає деталі конкретної черги.
+ * @param {Object} req - Об’єкт запиту Express із параметром id черги.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Рендерить шаблон 'queue' із даними черги або повертає 404, якщо черги немає.
+ */
+export const getQueueById = (req, res) => {
+  const queue = queueService.getQueueById(parseInt(req.params.id));
   if (queue) {
-    const owner = getUserById(queue.ownerId);
-    const queueList = queue.queueList.map((userId) => getUserById(userId));
+    const owner = userRepository.getUserById(queue.ownerId);
+    const queueList = queue.queueList.map((userId) =>
+      userRepository.getUserById(userId)
+    );
     res.render("queue", { queue, owner, queueList });
   } else {
-    res.status(404).send("Чергу не знайдено");
+    res.status(404).send("Queue not found");
   }
-}
+};
 
-export function createQueue(req, res) {
+/**
+ * Обробляє POST /queues: Створює нову чергу та перенаправляє на список черг.
+ * @param {Object} req - Об’єкт запиту Express із name та ownerId у body.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Перенаправляє на '/queues'.
+ */
+export const createQueue = (req, res) => {
   const { name, ownerId } = req.body;
-  _createQueue(name, parseInt(ownerId));
+  queueService.createQueue(name, parseInt(ownerId));
   res.redirect("/queues");
-}
+};
 
-export function joinQueue(req, res) {
+/**
+ * Обробляє POST /queues/:id/join: Дозволяє користувачу приєднатися до черги.
+ * @param {Object} req - Об’єкт запиту Express із id черги в params та userId у body.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
+ */
+export const joinQueue = (req, res) => {
   const queueId = parseInt(req.params.id);
   const { userId } = req.body;
-  const success = _joinQueue(queueId, parseInt(userId));
+  const success = queueService.joinQueue(queueId, parseInt(userId));
   if (success) {
     res.redirect(`/queues/${queueId}`);
   } else {
-    res.status(400).send("Не вдалося приєднатися до черги");
+    res.status(400).send("Failed to join the queue");
   }
-}
+};
 
-export function getUserPosition(req, res) {
+/**
+ * Обробляє GET /queues/:id/my-position: Показує позицію користувача в черзі.
+ * @param {Object} req - Об’єкт запиту Express із id черги в params та userId у query.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Рендерить шаблон 'position' або повертає 404, якщо користувача немає в черзі.
+ */
+export const getUserPosition = (req, res) => {
   const queueId = parseInt(req.params.id);
   const userId = parseInt(req.query.userId);
-  const position = _getUserPosition(queueId, userId);
+  const position = queueService.getUserPosition(queueId, userId);
   if (position !== null) {
     res.render("position", { position });
   } else {
-    res.status(404).send("Користувача немає в черзі");
+    res.status(404).send("User not found in queue");
   }
-}
+};
 
-export function nextInQueue(req, res) {
+/**
+ * Обробляє POST /queues/:id/next: Просуває чергу, видаляючи першого користувача (тільки власник).
+ * @param {Object} req - Об’єкт запиту Express із id черги в params та ownerId у body.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Повертає ім’я наступного користувача або 400 у разі помилки.
+ */
+export const nextInQueue = (req, res) => {
   const queueId = parseInt(req.params.id);
   const { ownerId } = req.body;
-  const nextUserId = _nextInQueue(queueId, parseInt(ownerId));
+  const nextUserId = queueService.nextInQueue(queueId, parseInt(ownerId));
   if (nextUserId) {
-    const nextUser = getUserById(nextUserId);
-    res.send(`Наступний користувач: ${nextUser.name}`);
+    const nextUser = userRepository.getUserById(nextUserId);
+    res.send(`Next user: ${nextUser.name}`);
   } else {
-    res.status(400).send("Не вдалося викликати наступного");
+    res.status(400).send("Failed to call next user");
   }
-}
+};
 
-export function removeUserFromQueue(req, res) {
+/**
+ * Обробляє POST /queues/:id/remove/:userId: Видаляє користувача з черги (тільки власник).
+ * @param {Object} req - Об’єкт запиту Express із id черги та userId у params, ownerId у body.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
+ */
+export const removeUserFromQueue = (req, res) => {
   const queueId = parseInt(req.params.id);
   const userId = parseInt(req.params.userId);
   const { ownerId } = req.body;
-  const success = _removeUserFromQueue(queueId, userId, parseInt(ownerId));
+  const success = queueService.removeUserFromQueue(
+    queueId,
+    userId,
+    parseInt(ownerId)
+  );
   if (success) {
     res.redirect(`/queues/${queueId}`);
   } else {
-    res.status(400).send("Не вдалося видалити користувача");
+    res.status(400).send("Failed to remove user");
   }
-}
+};
 
-export function closeQueue(req, res) {
+/**
+ * Обробляє POST /queues/:id/close: Закриває чергу (тільки власник).
+ * @param {Object} req - Об’єкт запиту Express із id черги в params та ownerId у body.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
+ */
+export const closeQueue = (req, res) => {
   const queueId = parseInt(req.params.id);
   const { ownerId } = req.body;
-  const success = _closeQueue(queueId, parseInt(ownerId));
+  const success = queueService.closeQueue(queueId, parseInt(ownerId));
   if (success) {
     res.redirect(`/queues/${queueId}`);
   } else {
-    res.status(400).send("Не вдалося закрити чергу");
+    res.status(400).send("Failed to close queue");
   }
-}
+};
