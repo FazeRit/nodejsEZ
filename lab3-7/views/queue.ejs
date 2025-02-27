@@ -1,0 +1,21 @@
+<h1><%= queue.name %></h1>
+<p>Власник: <%= owner.name %></p>
+<p>Статус: <%= queue.isClosed ? 'Закрита' : 'Відкрита' %></p>
+<h2>Список у черзі</h2>
+<ul>
+  <% queueList.forEach(user => { %>
+  <li><%= user.name %></li>
+  <% }) %>
+</ul>
+<form action="/queues/<%= queue.id %>/join" method="post">
+  <input type="text" name="userId" placeholder="ID користувача" />
+  <button type="submit">Приєднатися до черги</button>
+</form>
+<form action="/queues/<%= queue.id %>/next" method="post">
+  <input type="text" name="ownerId" placeholder="ID власника" />
+  <button type="submit">Наступний</button>
+</form>
+<form action="/queues/<%= queue.id %>/close" method="post">
+  <input type="text" name="ownerId" placeholder="ID власника" />
+  <button type="submit">Закрити чергу</button>
+</form>
