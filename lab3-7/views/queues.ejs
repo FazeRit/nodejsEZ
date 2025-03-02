@@ -1,0 +1,11 @@
+<h1>Черги</h1>
+<ul>
+  <% queues.forEach(queue => { %>
+  <li><a href="/queues/<%= queue.id %>"><%= queue.name %></a></li>
+  <% }) %>
+</ul>
+<form action="/queues" method="post">
+  <input type="text" name="name" placeholder="Назва черги" />
+  <input type="text" name="ownerId" placeholder="ID власника" />
+  <button type="submit">Створити чергу</button>
+</form>

@@ -1,0 +1,66 @@
+/**
+ * @fileoverview Шар репозиторію для даних черг у системі "Електронна черга".
+ *
+ * @description
+ * Цей модуль надає методи доступу до даних черг. Наразі використовується in-memory сховище як заглушка,
+ * що імітує базу даних із масивом об’єктів черг та базовими CRUD-операціями.
+ *
+ * Властивості черги:
+ * - id: Унікальний ідентифікатор.
+ * - name: Назва черги.
+ * - ownerId: Ідентифікатор власника черги.
+ * - isClosed: Булеве значення, що вказує, чи закрита черга.
+ * - queueList: Масив ідентифікаторів користувачів у черзі.
+ *
+ * Містить тестові дані для демонстрації. Розроблено для заміни реальною базою даних у майбутньому.
+ *
+ * @module repositories/queueRepository
+ *
+ * @author [Ваше Ім’я]
+ * @date 2025-02-27
+ */
+
+let queues = [
+  { id: 1, name: "Queue 1", ownerId: 1, isClosed: false, queueList: [2, 3] },
+  { id: 2, name: "Queue 2", ownerId: 2, isClosed: false, queueList: [] },
+];
+let nextId = 3;
+
+/**
+ * Отримує всі черги.
+ * @returns {Array} Список усіх об’єктів черг.
+ */
+export const getAllQueues = () => queues;
+
+/**
+ * Отримує чергу за її ID.
+ * @param {number} id - Ідентифікатор черги.
+ * @returns {Object|null} Об’єкт черги, якщо знайдено, інакше null.
+ */
+export const getQueueById = (id) => queues.find((q) => q.id === id);
+
+/**
+ * Створює нову чергу.
+ * @param {Object} queue - Дані черги для створення.
+ * @returns {Object} Новий об’єкт черги з призначеним ID.
+ */
+export const createQueue = (queue) => {
+  const newQueue = { id: nextId++, ...queue };
+  queues.push(newQueue);
+  return newQueue;
+};
+
+/**
+ * Оновлює існуючу чергу.
+ * @param {number} id - Ідентифікатор черги для оновлення.
+ * @param {Object} updatedQueue - Оновлені дані черги.
+ * @returns {Object|null} Оновлений об’єкт черги, якщо знайдено, інакше null.
+ */
+export const updateQueue = (id, updatedQueue) => {
+  const index = queues.findIndex((q) => q.id === id);
+  if (index !== -1) {
+    queues[index] = { ...queues[index], ...updatedQueue };
+    return queues[index];
+  }
+  return null;
+};
