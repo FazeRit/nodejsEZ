@@ -44,3 +44,4 @@ app.post("/queues/:id/close", queueController.closeQueue);
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+

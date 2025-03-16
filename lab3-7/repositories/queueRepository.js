@@ -64,3 +64,36 @@ export const updateQueue = (id, updatedQueue) => {
   }
   return null;
 };
+
+const fs = require('fs').promises;
+const path = require('path');
+const dataFilePath = path.join(__dirname, '../data/queues.json');
+
+// Функція для асинхронного зчитування даних з файлу
+async function findQueueById(queueId) {
+  try {
+    const data = await fs.readFile(dataFilePath, 'utf8');
+    const queues = JSON.parse(data);
+    return queues.find(queue => queue.id === queueId);
+  } catch (error) {
+    throw new Error(`Помилка читання даних: ${error.message}`);
+  }
+}
+
+// Функція для асинхронного збереження оновлених даних в файл
+async function saveQueue(updatedQueue) {
+  try {
+    const data = await fs.readFile(dataFilePath, 'utf8');
+    let queues = JSON.parse(data);
+    queues = queues.map(queue => queue.id === updatedQueue.id ? updatedQueue : queue);
+    await fs.writeFile(dataFilePath, JSON.stringify(queues, null, 2));
+    return updatedQueue;
+  } catch (error) {
+    throw new Error(`Помилка запису даних: ${error.message}`);
+  }
+}
+
+module.exports = {
+  findQueueById,
+  saveQueue,
+};

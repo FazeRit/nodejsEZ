@@ -126,3 +126,36 @@ export const closeQueue = (queueId, ownerId) => {
   }
   return false;
 };
+
+const queueRepository = require('../repositories/queueRepository');
+
+async function getQueueById(queueId) {
+  // Додаткова валідація або бізнес-логіка може бути додана тут
+  return await queueRepository.findQueueById(queueId);
+}
+
+async function joinQueue(queueId, userId) {
+  const queue = await queueRepository.findQueueById(queueId);
+  if (!queue) {
+    throw new Error('Чергу не знайдено');
+  }
+  if (queue.closed) {
+    throw new Error('Запис до цієї черги закритий');
+  }
+  // Перевірка, чи не перебуває користувач вже в черзі, тощо
+  const newPlace = {
+    id: userId,
+    position: queue.users.length + 1,
+  };
+  queue.users.push(newPlace);
+  await queueRepository.saveQueue(queue);
+  return queue;
+}
+
+// Інші методи: обробка команди "наступний", видалення користувача, закриття черги тощо
+
+module.exports = {
+  getQueueById,
+  joinQueue,
+  // експорт інших методів
+};
