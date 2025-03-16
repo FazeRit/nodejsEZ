@@ -15,28 +15,43 @@
  * @date 16-03-2025
  */
 
-const fs = require('fs'); // Імпорт модуля fs
+import fs from 'fs'; // Імпорт модуля fs як ES Module
 
 const FILE_PATH = "users.json"; // Шлях до файлу
-let users = []; // Ініціалізація масиву users
+
+let users = [
+  { id: 1, name: "Owner1" },
+  { id: 2, name: "User1" },
+  { id: 3, name: "User2" },
+];
 
 /**
- * Читає список користувачів з файлу і оновлює масив users.
+ * Читає список користувачів з файлу і додає нових до масиву users.
  * @param {function} callback - Функція з параметрами (error, data).
  */
 const readUsersFromFile = (callback) => {
+  // console.log("Масив users ДО зчитування:", users); // Вивід до зчитування
+  
   fs.readFile(FILE_PATH, "utf8", (err, data) => {
     if (err) {
       if (err.code === "ENOENT") {
-        // Якщо файл не існує, повертаємо пустий масив
-        users = [];
+        // Якщо файл не існує, повертаємо поточний масив users
         return callback(null, users);
       }
       return callback(err, null);
     }
     try {
-      // Парсимо JSON і оновлюємо масив users
-      users = JSON.parse(data || "[]");
+      // Парсимо JSON із файлу
+      const fileUsers = JSON.parse(data || "[]");
+      
+      // Додаємо лише тих користувачів, яких ще немає в масиві (за id)
+      fileUsers.forEach((fileUser) => {
+        if (!users.some((u) => u.id === fileUser.id)) {
+          users.push(fileUser);
+        }
+      });
+      
+      // console.log("Масив users ПІСЛЯ зчитування:", users); // Вивід після зчитування
       callback(null, users);
     } catch (parseErr) {
       callback(parseErr, null);
@@ -52,18 +67,18 @@ const readUsersFromFile = (callback) => {
 const getUserById = (id) => users.find((u) => u.id === id);
 
 // Експортуємо функції для використання в інших модулях
-module.exports = {
+export {
   readUsersFromFile,
   getUserById
 };
 
-// // Приклад використання
+// Приклад використання
 // readUsersFromFile((err, data) => {
 //   if (err) {
 //     console.error("Помилка при читанні файлу:", err);
 //     return;
 //   }
-//   console.log("Дані користувачів:", data);
+//   console.log("Оновлений масив користувачів (з callback):", data);
   
 //   // Приклад виклику getUserById після зчитування
 //   const user = getUserById(2);
