@@ -159,33 +159,3 @@ export const closeQueue = (req, res) => {
     res.status(400).send("Failed to close queue");
   }
 };
-
-const express = require('express');
-const router = express.Router();
-const queueService = require('../services/queueService');
-
-// Отримання інформації про конкретну чергу
-router.get('/queue/:id', async (req, res) => {
-  try {
-    const queue = await queueService.getQueueById(req.params.id);
-    // Рендеримо HTML-шаблон (наприклад, з використанням EJS, Pug тощо)
-    res.render('queue', { queue });
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-});
-
-// Додавання користувача до черги
-router.post('/queue/:id/join', async (req, res) => {
-  try {
-    const userId = req.body.userId;
-    await queueService.joinQueue(req.params.id, userId);
-    res.redirect(`/queue/${req.params.id}`);
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-});
-
-// Інші маршрути: команда "наступний", видалення користувача, закриття черги тощо
-
-module.exports = router;
