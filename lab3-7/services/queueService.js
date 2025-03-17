@@ -83,7 +83,7 @@ export const getUserPosition = (queueId, userId) => {
  */
 export const nextInQueue = (queueId, ownerId) => {
   const queue = queueRepository.getQueueById(queueId);
-  if (queue && queue.ownerId === ownerId && queue.queueList.length > 0) {
+  if (isOwner(queueId, ownerId) && queue.queueList.length > 0) {
     const nextUser = queue.queueList.shift();
     queueRepository.updateQueue(queueId, queue);
     return nextUser;
@@ -100,7 +100,7 @@ export const nextInQueue = (queueId, ownerId) => {
  */
 export const removeUserFromQueue = (queueId, userId, ownerId) => {
   const queue = queueRepository.getQueueById(queueId);
-  if (queue && queue.ownerId === ownerId) {
+  if (isOwner(queueId, ownerId)) {
     const index = queue.queueList.indexOf(userId);
     if (index !== -1) {
       queue.queueList.splice(index, 1);
@@ -111,6 +111,11 @@ export const removeUserFromQueue = (queueId, userId, ownerId) => {
   return false;
 };
 
+const isOwner = (queueId, userId) => {
+  const queue = queueRepository.getQueueById(queueId);
+  return queue && queue.ownerId === userId;
+}
+
 /**
  * Закриває чергу, забороняючи подальші приєднання, якщо запит від власника.
  * @param {number} queueId - Ідентифікатор черги.
@@ -119,7 +124,7 @@ export const removeUserFromQueue = (queueId, userId, ownerId) => {
  */
 export const closeQueue = (queueId, ownerId) => {
   const queue = queueRepository.getQueueById(queueId);
-  if (queue && queue.ownerId === ownerId) {
+  if (isOwner(queueId, ownerId) && !queue.isClosed) {
     queue.isClosed = true;
     queueRepository.updateQueue(queueId, queue);
     return true;
