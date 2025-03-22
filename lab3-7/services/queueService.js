@@ -36,11 +36,11 @@ export const getQueueById = (id) => queueRepository.getQueueById(id);
 /**
  * Створює нову чергу з указаними назвою та власником.
  * @param {string} name - Назва черги.
- * @param {number} ownerId - Ідентифікатор власника черги.
+ * @param {number} owner_id - Ідентифікатор власника черги.
  * @returns {Object} Новий об’єкт черги.
  */
-export const createQueue = (name, ownerId) => {
-  const queue = { name, ownerId, isClosed: false, queueList: [] };
+export const createQueue = (name, owner_id) => {
+  const queue = { name, owner_id, is_closed: false, queue_list: [] };
   return queueRepository.createQueue(queue);
 };
 
@@ -52,8 +52,8 @@ export const createQueue = (name, ownerId) => {
  */
 export const joinQueue = (queueId, userId) => {
   const queue = queueRepository.getQueueById(queueId);
-  if (queue && !queue.isClosed && !queue.queueList.includes(userId)) {
-    queue.queueList.push(userId);
+  if (queue && !queue.is_closed && !queue.queue_list.includes(userId)) {
+    queue.queue_list.push(userId);
     queueRepository.updateQueue(queueId, queue);
     return true;
   }
@@ -69,7 +69,7 @@ export const joinQueue = (queueId, userId) => {
 export const getUserPosition = (queueId, userId) => {
   const queue = queueRepository.getQueueById(queueId);
   if (queue) {
-    const position = queue.queueList.indexOf(userId);
+    const position = queue.queue_list.indexOf(userId);
     if (position !== -1) return position + 1;
   }
   return null;
@@ -78,13 +78,13 @@ export const getUserPosition = (queueId, userId) => {
 /**
  * Просуває чергу, видаляючи першого користувача, якщо запит від власника.
  * @param {number} queueId - Ідентифікатор черги.
- * @param {number} ownerId - Ідентифікатор власника черги.
+ * @param {number} owner_id - Ідентифікатор власника черги.
  * @returns {number|null} Ідентифікатор наступного користувача, якщо успішно, інакше null.
  */
-export const nextInQueue = (queueId, ownerId) => {
+export const nextInQueue = (queueId, owner_id) => {
   const queue = queueRepository.getQueueById(queueId);
-  if (isOwner(queueId, ownerId) && queue.queueList.length > 0) {
-    const nextUser = queue.queueList.shift();
+  if (isOwner(queueId, owner_id) && queue.queue_list.length > 0) {
+    const nextUser = queue.queue_list.shift();
     queueRepository.updateQueue(queueId, queue);
     return nextUser;
   }
@@ -95,15 +95,15 @@ export const nextInQueue = (queueId, ownerId) => {
  * Видаляє конкретного користувача з черги, якщо запит від власника.
  * @param {number} queueId - Ідентифікатор черги.
  * @param {number} userId - Ідентифікатор користувача, якого потрібно видалити.
- * @param {number} ownerId - Ідентифікатор власника черги.
+ * @param {number} owner_id - Ідентифікатор власника черги.
  * @returns {boolean} True, якщо користувача успішно видалено, інакше false.
  */
-export const removeUserFromQueue = (queueId, userId, ownerId) => {
+export const removeUserFromQueue = (queueId, userId, owner_id) => {
   const queue = queueRepository.getQueueById(queueId);
-  if (isOwner(queueId, ownerId)) {
-    const index = queue.queueList.indexOf(userId);
+  if (isOwner(queueId, owner_id)) {
+    const index = queue.queue_list.indexOf(userId);
     if (index !== -1) {
-      queue.queueList.splice(index, 1);
+      queue.queue_list.splice(index, 1);
       queueRepository.updateQueue(queueId, queue);
       return true;
     }
@@ -113,19 +113,19 @@ export const removeUserFromQueue = (queueId, userId, ownerId) => {
 
 const isOwner = (queueId, userId) => {
   const queue = queueRepository.getQueueById(queueId);
-  return queue && queue.ownerId === userId;
-}
+  return queue && queue.owner_id === userId;
+};
 
 /**
  * Закриває чергу, забороняючи подальші приєднання, якщо запит від власника.
  * @param {number} queueId - Ідентифікатор черги.
- * @param {number} ownerId - Ідентифікатор власника черги.
+ * @param {number} owner_id - Ідентифікатор власника черги.
  * @returns {boolean} True, якщо чергу успішно закрито, інакше false.
  */
-export const closeQueue = (queueId, ownerId) => {
+export const closeQueue = (queueId, owner_id) => {
   const queue = queueRepository.getQueueById(queueId);
-  if (isOwner(queueId, ownerId) && !queue.isClosed) {
-    queue.isClosed = true;
+  if (isOwner(queueId, owner_id) && !queue.is_closed) {
+    queue.is_closed = true;
     queueRepository.updateQueue(queueId, queue);
     return true;
   }

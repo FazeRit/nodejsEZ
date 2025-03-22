@@ -8,9 +8,9 @@
  * Властивості черги:
  * - id: Унікальний ідентифікатор.
  * - name: Назва черги.
- * - ownerId: Ідентифікатор власника черги.
- * - isClosed: Булеве значення, що вказує, чи закрита черга.
- * - queueList: Масив ідентифікаторів користувачів у черзі.
+ * - owner_id: Ідентифікатор власника черги.
+ * - is_closed: Булеве значення, що вказує, чи закрита черга.
+ * - queue_list: Масив ідентифікаторів користувачів у черзі.
  *
  * Містить тестові дані для демонстрації. Розроблено для заміни реальною базою даних у майбутньому.
  *
@@ -23,14 +23,32 @@
 import * as fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import pool from "../config/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-let queues = [
-  { id: 1, name: "Queue 1", ownerId: 1, isClosed: false, queueList: [2, 3] },
-  { id: 2, name: "Queue 2", ownerId: 2, isClosed: false, queueList: [] },
-];
+let queues = [];
+
+export const getAllQueuesBD = async () => {
+  try {
+    const res = await pool.query("SELECT * FROM queues");
+    res.rows.forEach((newQueue) => {
+      if (!queues.some((q) => q.id === newQueue.id)) {
+        queues.push(newQueue);
+      }
+    });
+    return queues;
+  } catch (error) {
+    console.error("Помилка при отриманні черг:", error);
+    throw error;
+  }
+};
+
+(async () => {
+  await getAllQueuesBD();
+  console.log("Queue data initialized from BD:", queues);
+})();
 
 const readFileWithAwait = async (filename) => {
   try {
