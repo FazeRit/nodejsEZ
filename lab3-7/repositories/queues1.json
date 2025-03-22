@@ -1,23 +1,23 @@
 [
   {
-    "id": 6,
-    "name": "Appointment",
-    "ownerId": 1,
-    "isClosed": false,
-    "queueList": [1, 2]
-  },
-  {
-    "id": 7,
-    "name": "Service",
-    "ownerId": 2,
-    "isClosed": true,
-    "queueList": [1]
-  },
-  {
     "id": 8,
+    "name": "Appointment",
+    "owner_id": 1,
+    "is_closed": false,
+    "queue_list": [1, 2]
+  },
+  {
+    "id": 9,
+    "name": "Service",
+    "owner_id": 2,
+    "is_closed": true,
+    "queue_list": [1]
+  },
+  {
+    "id": 10,
     "name": "Support",
-    "ownerId": 2,
-    "isClosed": false,
-    "queueList": [2]
+    "owner_id": 2,
+    "is_closed": false,
+    "queue_list": [2]
   }
 ]

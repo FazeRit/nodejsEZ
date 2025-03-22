@@ -1,23 +1,23 @@
 [
   {
-    "id": 3,
-    "name": "Doctor Appointment",
-    "ownerId": 1,
-    "isClosed": false,
-    "queueList": [1, 2]
-  },
-  {
-    "id": 4,
-    "name": "Bank Service",
-    "ownerId": 2,
-    "isClosed": true,
-    "queueList": [1]
-  },
-  {
     "id": 5,
+    "name": "Doctor Appointment",
+    "owner_id": 1,
+    "is_closed": false,
+    "queue_list": [1, 2]
+  },
+  {
+    "id": 6,
+    "name": "Bank Service",
+    "owner_id": 2,
+    "is_closed": true,
+    "queue_list": [1]
+  },
+  {
+    "id": 7,
     "name": "Tech Support",
-    "ownerId": 2,
-    "isClosed": false,
-    "queueList": [2]
+    "owner_id": 2,
+    "is_closed": false,
+    "queue_list": [2]
   }
 ]

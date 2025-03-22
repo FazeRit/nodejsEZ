@@ -17,6 +17,7 @@
 import * as fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import pool from "../config/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,12 +27,35 @@ const FILE_PATH1 = "users1.json";
 
 let users = [];
 
+export const getAllUsers = async () => {
+  try {
+    const res = await pool.query("SELECT * FROM people");
+    res.rows.forEach((newUser) => {
+      if (!users.some((u) => u.id === newUser.id)) {
+        users.push(newUser);
+      }
+    });
+    return users;
+  } catch (error) {
+    console.error("Помилка при отриманні всіх користувачів:", error);
+    throw error;
+  }
+};
+
+(async () => {
+  await getAllUsers();
+  console.log("Queue data initialized from BD:", users);
+})();
+
 const readFileWithPromise = (filename) => {
   const filePath = path.join(__dirname, filename);
-  return fs.promises.readFile(filePath, "utf8")
+  return fs.promises
+    .readFile(filePath, "utf8")
     .then((data) => {
       if (!data || data.trim() === "") {
-        console.warn(`File ${filename} is empty or invalid, using default users.`);
+        console.warn(
+          `File ${filename} is empty or invalid, using default users.`
+        );
         return users;
       }
       const parsedData = JSON.parse(data);
@@ -47,10 +71,9 @@ const readFileWithPromise = (filename) => {
     });
 };
 
-readFileWithPromise(FILE_PATH1)
-  .then((usersData) => {
-    console.log("Queue data initialized 1:", usersData);
-  });
+readFileWithPromise(FILE_PATH1).then((usersData) => {
+  console.log("Queue data initialized 1:", usersData);
+});
 
 /**
  * Читає список користувачів з файлу і додає нових до масиву users.
@@ -68,10 +91,10 @@ const readUsersFromFile = (callback) => {
     try {
       // Парсимо JSON із файлу
       const fileUsers = JSON.parse(data || "[]");
-      
+
       // Додаємо користувачів з файлу до масиву
       users.push(...fileUsers);
-      
+
       console.log("Масив users ПІСЛЯ зчитування:", users);
       callback(null, users);
     } catch (parseErr) {
@@ -97,7 +120,4 @@ readUsersFromFile((err, data) => {
 const getUserById = (id) => users.find((u) => u.id === id);
 
 // Експортуємо функції для використання в інших модулях
-export {
-  readUsersFromFile,
-  getUserById
-};
+export { readUsersFromFile, getUserById };

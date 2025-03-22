@@ -31,7 +31,6 @@ const port = 3000;
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Маршрути
 app.get("/queues", queueController.getAllQueues);
 app.get("/queues/:id", queueController.getQueueById);
 app.post("/queues", queueController.createQueue);
