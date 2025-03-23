@@ -20,13 +20,7 @@
  * @date 2025-02-27
  */
 
-import * as fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import pool from "../config/db.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 let queues = [];
 
@@ -48,58 +42,6 @@ export const getAllQueuesBD = async () => {
 (async () => {
   await getAllQueuesBD();
   console.log("Queue data initialized from BD:", queues);
-})();
-
-const readFileWithAwait = async (filename) => {
-  try {
-    const filePath = path.join(__dirname, filename);
-    const data = await fs.promises.readFile(filePath, "utf8");
-    if (!data || data.trim() === "") {
-      console.warn(
-        `File ${filename} is empty or invalid, using default queues.`
-      );
-      return queues;
-    }
-
-    const parsedData = JSON.parse(data);
-    queues.push(...parsedData);
-    console.log(`Added ${parsedData.length} new queues from ${filename}`);
-    return queues;
-  } catch (error) {
-    console.error(`Error reading file ${filename}:`, error.message);
-    return queues;
-  }
-};
-
-const readFileWithSync = (filename) => {
-  try {
-    const filePath = path.join(__dirname, filename);
-    const data = fs.readFileSync(filePath, "utf8");
-    if (!data || data.trim() === "") {
-      console.warn(
-        `File ${filename} is empty or invalid, using default queues.`
-      );
-      return queues;
-    }
-
-    const parsedData = JSON.parse(data);
-    queues.push(...parsedData);
-    console.log(`Added ${parsedData.length} new queues from ${filename}`);
-    return queues;
-  } catch (error) {
-    console.error(`Error reading file ${filename}:`, error.message);
-    return queues;
-  }
-};
-
-(async () => {
-  await readFileWithAwait("queues1.json");
-  console.log("Queue data initialized 1:", queues);
-})();
-
-(() => {
-  readFileWithSync("queues.json");
-  console.log("Queue data initialized 2:", queues);
 })();
 
 const getNextId = () => {
