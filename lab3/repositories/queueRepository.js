@@ -8,9 +8,9 @@
  * Властивості черги:
  * - id: Унікальний ідентифікатор.
  * - name: Назва черги.
- * - owner_id: Ідентифікатор власника черги.
- * - is_closed: Булеве значення, що вказує, чи закрита черга.
- * - queue_list: Масив ідентифікаторів користувачів у черзі.
+ * - ownerId: Ідентифікатор власника черги.
+ * - isClosed: Булеве значення, що вказує, чи закрита черга.
+ * - queueList: Масив ідентифікаторів користувачів у черзі.
  *
  * Містить тестові дані для демонстрації. Розроблено для заміни реальною базою даних у майбутньому.
  *
@@ -20,28 +20,68 @@
  * @date 2025-02-27
  */
 
-import pool from "../config/db.js";
+import * as fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-let queues = [];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export const getAllQueuesBD = async () => {
+let queues = [
+  { id: 1, name: "Queue 1", ownerId: 1, isClosed: false, queueList: [2, 3] },
+  { id: 2, name: "Queue 2", ownerId: 2, isClosed: false, queueList: [] },
+];
+
+const readFileWithAwait = async (filename) => {
   try {
-    const res = await pool.query("SELECT * FROM queues");
-    res.rows.forEach((newQueue) => {
-      if (!queues.some((q) => q.id === newQueue.id)) {
-        queues.push(newQueue);
-      }
-    });
+    const filePath = path.join(__dirname, filename);
+    const data = await fs.promises.readFile(filePath, "utf8");
+    if (!data || data.trim() === "") {
+      console.warn(
+        `File ${filename} is empty or invalid, using default queues.`
+      );
+      return queues;
+    }
+
+    const parsedData = JSON.parse(data);
+    queues.push(...parsedData);
+    console.log(`Added ${parsedData.length} new queues from ${filename}`);
     return queues;
   } catch (error) {
-    console.error("Помилка при отриманні черг:", error);
-    throw error;
+    console.error(`Error reading file ${filename}:`, error.message);
+    return queues;
+  }
+};
+
+const readFileWithSync = (filename) => {
+  try {
+    const filePath = path.join(__dirname, filename);
+    const data = fs.readFileSync(filePath, "utf8");
+    if (!data || data.trim() === "") {
+      console.warn(
+        `File ${filename} is empty or invalid, using default queues.`
+      );
+      return queues;
+    }
+
+    const parsedData = JSON.parse(data);
+    queues.push(...parsedData);
+    console.log(`Added ${parsedData.length} new queues from ${filename}`);
+    return queues;
+  } catch (error) {
+    console.error(`Error reading file ${filename}:`, error.message);
+    return queues;
   }
 };
 
 (async () => {
-  await getAllQueuesBD();
-  console.log("Queue data initialized from BD:", queues);
+  await readFileWithAwait("queues1.json");
+  console.log("Queue data initialized 1:", queues);
+})();
+
+(() => {
+  readFileWithSync("queues.json");
+  console.log("Queue data initialized 2:", queues);
 })();
 
 const getNextId = () => {

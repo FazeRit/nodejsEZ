@@ -14,7 +14,6 @@
  * @author [Potapenko Eldar]
  * @date 16-03-2025
  */
-
 import pool from "../config/db.js";
 
 let users = [];

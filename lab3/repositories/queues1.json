@@ -1,0 +1,23 @@
+[
+  {
+    "id": 6,
+    "name": "Appointment",
+    "ownerId": 1,
+    "isClosed": false,
+    "queueList": [1, 2]
+  },
+  {
+    "id": 7,
+    "name": "Service",
+    "ownerId": 2,
+    "isClosed": true,
+    "queueList": [1]
+  },
+  {
+    "id": 8,
+    "name": "Support",
+    "ownerId": 2,
+    "isClosed": false,
+    "queueList": [2]
+  }
+]
