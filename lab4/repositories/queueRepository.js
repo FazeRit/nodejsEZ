@@ -21,27 +21,15 @@
  */
 import pool from "../config/db.js";
 
-let queues = [];
-
-export const getAllQueuesBD = async () => {
+export const getAllQueues = async () => {
   try {
     const res = await pool.query("SELECT * FROM queues");
-    res.rows.forEach((newQueue) => {
-      if (!queues.some((q) => q.id === newQueue.id)) {
-        queues.push(newQueue);
-      }
-    });
-    return queues;
+    return res.rows;
   } catch (error) {
     console.error("Помилка при отриманні черг:", error);
     throw error;
   }
 };
-
-(async () => {
-  await getAllQueuesBD();
-  console.log("Queue data initialized from BD:", queues);
-})();
 
 const getNextId = () => {
   if (queues.length === 0) return 1;
@@ -50,17 +38,19 @@ const getNextId = () => {
 };
 
 /**
- * Отримує всі черги.
- * @returns {Array} Список усіх об’єктів черг.
- */
-export const getAllQueues = () => queues;
-
-/**
  * Отримує чергу за її ID.
  * @param {number} id - Ідентифікатор черги.
- * @returns {Object|null} Об’єкт черги, якщо знайдено, інакше null.
+ * @returns {Promise<Object|null>} Об’єкт черги, якщо знайдено, інакше null.
  */
-export const getQueueById = (id) => queues.find((q) => q.id === id) || null;
+export const getQueueById = async (id) => {
+  try {
+    const res = await pool.query("SELECT * FROM queues WHERE id = $1", [id]);
+    return res.rows[0] || null;
+  } catch (error) {
+    console.error("Помилка при отриманні черги за ID:", error);
+    throw error;
+  }
+};
 
 /**
  * Створює нову чергу.

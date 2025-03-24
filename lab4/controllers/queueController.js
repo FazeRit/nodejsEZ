@@ -31,29 +31,41 @@ import * as userRepository from "../repositories/userRepository.js";
  * Обробляє GET /queues: Відображає список усіх черг.
  * @param {Object} req - Об’єкт запиту Express.
  * @param {Object} res - Об’єкт відповіді Express.
- * @returns {void} Рендерить шаблон 'queues' зі списком черг.
+ * @returns {Promise<void>} Рендерить шаблон 'queues' зі списком черг.
  */
-export const getAllQueues = (req, res) => {
-  const queues = queueService.getAllQueues();
-  res.render("queues", { queues });
+export const getAllQueues = async (req, res) => {
+  try {
+    const queues = await queueService.getAllQueues();
+    res.render("queues", { queues });
+  } catch (error) {
+    console.error("Помилка при отриманні списку черг:", error);
+    res.status(500).send("Internal Server Error");
+  }
 };
 
 /**
  * Обробляє GET /queues/:id: Відображає деталі конкретної черги.
  * @param {Object} req - Об’єкт запиту Express із параметром id черги.
  * @param {Object} res - Об’єкт відповіді Express.
- * @returns {void} Рендерить шаблон 'queue' із даними черги або повертає 404, якщо черги немає.
+ * @returns {Promise<void>} Рендерить шаблон 'queue' із даними черги або повертає 404, якщо черги немає.
  */
-export const getQueueById = (req, res) => {
-  const queue = queueService.getQueueById(parseInt(req.params.id));
-  if (queue) {
-    const owner = userRepository.getUserById(queue.owner_id);
-    const queue_list = queue.queue_list.map((userId) =>
-      userRepository.getUserById(userId)
-    );
-    res.render("queue", { queue, owner, queue_list });
-  } else {
-    res.status(404).send("Queue not found");
+export const getQueueById = async (req, res) => {
+  try {
+    const queue = await queueService.getQueueById(parseInt(req.params.id));
+    if (queue) {
+      const owner = await userRepository.getUserById(queue.owner_id);
+      const queueList = await Promise.all(
+        queue.queue_list.map(
+          async (userId) => await userRepository.getUserById(userId)
+        )
+      );
+      res.render("queue", { queue, owner, queue_list: queueList });
+    } else {
+      res.status(404).send("Queue not found");
+    }
+  } catch (error) {
+    console.error("Помилка при отриманні черги:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
 

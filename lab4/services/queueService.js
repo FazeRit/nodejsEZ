@@ -22,16 +22,20 @@ import * as userRepository from "../repositories/userRepository.js";
 
 /**
  * Отримує всі черги з репозиторію.
- * @returns {Array} Список усіх об’єктів черг.
+ * @returns {Promise<Array>} Список усіх об’єктів черг.
  */
-export const getAllQueues = () => queueRepository.getAllQueues();
+export const getAllQueues = async () => {
+  return await queueRepository.getAllQueues();
+};
 
 /**
  * Отримує конкретну чергу за її ID.
  * @param {number} id - Ідентифікатор черги.
- * @returns {Object|null} Об’єкт черги, якщо знайдено, інакше null.
+ * @returns {Promise<Object|null>} Об’єкт черги, якщо знайдено, інакше null.
  */
-export const getQueueById = (id) => queueRepository.getQueueById(id);
+export const getQueueById = async (id) => {
+  return await queueRepository.getQueueById(id);
+};
 
 /**
  * Створює нову чергу з указаними назвою та власником.
