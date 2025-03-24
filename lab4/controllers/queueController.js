@@ -121,15 +121,25 @@ export const getUserPosition = (req, res) => {
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Повертає ім’я наступного користувача або 400 у разі помилки.
  */
-export const nextInQueue = (req, res) => {
+export const nextInQueue = async (req, res) => {
   const queueId = parseInt(req.params.id);
   const { owner_id } = req.body;
-  const nextUserId = queueService.nextInQueue(queueId, parseInt(owner_id));
-  if (nextUserId) {
-    const nextUser = userRepository.getUserById(nextUserId);
-    res.send(`Next user: ${nextUser.name}`);
-  } else {
-    res.status(400).send("Failed to call next user");
+
+  try {
+    const result = await queueService.nextInQueue(queueId, parseInt(owner_id));
+    if (result && result.nextUser) {
+      const nextUser = await userRepository.getUserById(result.nextUser);
+      if (nextUser) {
+        res.send(`Next user: ${nextUser.name}`);
+      } else {
+        res.status(404).send("Next user not found");
+      }
+    } else {
+      res.status(400).send("Failed to call next user");
+    }
+  } catch (error) {
+    console.log("Error in nextInQueue controller:", error.message);
+    res.status(500).send("Internal server error");
   }
 };
 
