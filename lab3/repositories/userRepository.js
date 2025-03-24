@@ -17,7 +17,6 @@
 import * as fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import pool from "../config/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,26 +25,6 @@ const FILE_PATH = "users.json";
 const FILE_PATH1 = "users1.json";
 
 let users = [];
-
-export const getAllUsers = async () => {
-  try {
-    const res = await pool.query("SELECT * FROM people");
-    res.rows.forEach((newUser) => {
-      if (!users.some((u) => u.id === newUser.id)) {
-        users.push(newUser);
-      }
-    });
-    return users;
-  } catch (error) {
-    console.error("Помилка при отриманні всіх користувачів:", error);
-    throw error;
-  }
-};
-
-(async () => {
-  await getAllUsers();
-  console.log("Queue data initialized from BD:", users);
-})();
 
 const readFileWithPromise = (filename) => {
   const filePath = path.join(__dirname, filename);

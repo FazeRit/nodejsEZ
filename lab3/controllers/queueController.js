@@ -47,11 +47,11 @@ export const getAllQueues = (req, res) => {
 export const getQueueById = (req, res) => {
   const queue = queueService.getQueueById(parseInt(req.params.id));
   if (queue) {
-    const owner = userRepository.getUserById(queue.owner_id);
-    const queue_list = queue.queue_list.map((userId) =>
+    const owner = userRepository.getUserById(queue.ownerId);
+    const queueList = queue.queueList.map((userId) =>
       userRepository.getUserById(userId)
     );
-    res.render("queue", { queue, owner, queue_list });
+    res.render("queue", { queue, owner, queueList });
   } else {
     res.status(404).send("Queue not found");
   }
@@ -59,13 +59,13 @@ export const getQueueById = (req, res) => {
 
 /**
  * Обробляє POST /queues: Створює нову чергу та перенаправляє на список черг.
- * @param {Object} req - Об’єкт запиту Express із name та owner_id у body.
+ * @param {Object} req - Об’єкт запиту Express із name та ownerId у body.
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Перенаправляє на '/queues'.
  */
 export const createQueue = (req, res) => {
-  const { name, owner_id } = req.body;
-  queueService.createQueue(name, parseInt(owner_id));
+  const { name, ownerId } = req.body;
+  queueService.createQueue(name, parseInt(ownerId));
   res.redirect("/queues");
 };
 
@@ -105,14 +105,14 @@ export const getUserPosition = (req, res) => {
 
 /**
  * Обробляє POST /queues/:id/next: Просуває чергу, видаляючи першого користувача (тільки власник).
- * @param {Object} req - Об’єкт запиту Express із id черги в params та owner_id у body.
+ * @param {Object} req - Об’єкт запиту Express із id черги в params та ownerId у body.
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Повертає ім’я наступного користувача або 400 у разі помилки.
  */
 export const nextInQueue = (req, res) => {
   const queueId = parseInt(req.params.id);
-  const { owner_id } = req.body;
-  const nextUserId = queueService.nextInQueue(queueId, parseInt(owner_id));
+  const { ownerId } = req.body;
+  const nextUserId = queueService.nextInQueue(queueId, parseInt(ownerId));
   if (nextUserId) {
     const nextUser = userRepository.getUserById(nextUserId);
     res.send(`Next user: ${nextUser.name}`);
@@ -123,18 +123,18 @@ export const nextInQueue = (req, res) => {
 
 /**
  * Обробляє POST /queues/:id/remove/:userId: Видаляє користувача з черги (тільки власник).
- * @param {Object} req - Об’єкт запиту Express із id черги та userId у params, owner_id у body.
+ * @param {Object} req - Об’єкт запиту Express із id черги та userId у params, ownerId у body.
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
  */
 export const removeUserFromQueue = (req, res) => {
   const queueId = parseInt(req.params.id);
   const userId = parseInt(req.params.userId);
-  const { owner_id } = req.body;
+  const { ownerId } = req.body;
   const success = queueService.removeUserFromQueue(
     queueId,
     userId,
-    parseInt(owner_id)
+    parseInt(ownerId)
   );
   if (success) {
     res.redirect(`/queues/${queueId}`);
@@ -145,14 +145,14 @@ export const removeUserFromQueue = (req, res) => {
 
 /**
  * Обробляє POST /queues/:id/close: Закриває чергу (тільки власник).
- * @param {Object} req - Об’єкт запиту Express із id черги в params та owner_id у body.
+ * @param {Object} req - Об’єкт запиту Express із id черги в params та ownerId у body.
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
  */
 export const closeQueue = (req, res) => {
   const queueId = parseInt(req.params.id);
-  const { owner_id } = req.body;
-  const success = queueService.closeQueue(queueId, parseInt(owner_id));
+  const { ownerId } = req.body;
+  const success = queueService.closeQueue(queueId, parseInt(ownerId));
   if (success) {
     res.redirect(`/queues/${queueId}`);
   } else {
