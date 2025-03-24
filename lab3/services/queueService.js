@@ -114,7 +114,7 @@ export const removeUserFromQueue = (queueId, userId, ownerId) => {
 const isOwner = (queueId, userId) => {
   const queue = queueRepository.getQueueById(queueId);
   return queue && queue.ownerId === userId;
-}
+};
 
 /**
  * Закриває чергу, забороняючи подальші приєднання, якщо запит від власника.
