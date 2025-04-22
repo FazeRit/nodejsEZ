@@ -1,19 +1,3 @@
-/**
- * @fileoverview Шар репозиторію для даних користувачів у системі "Електронна черга".
- *
- * @description
- * Цей модуль надає методи доступу до даних користувачів. Використовується асинхронне читання з файлу users.json
- * з використанням функцій зворотного виклику (callbacks). Дані зберігаються в масиві users.
- *
- * Властивості користувача:
- * - id: Унікальний ідентифікатор.
- * - name: Ім’я користувача.
- *
- * @module repositories/userRepository
- *
- * @author [Potapenko Eldar]
- * @date 16-03-2025
- */
 import * as fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -28,10 +12,13 @@ let users = [];
 
 const readFileWithPromise = (filename) => {
   const filePath = path.join(__dirname, filename);
-  return fs.promises.readFile(filePath, "utf8")
+  return fs.promises
+    .readFile(filePath, "utf8")
     .then((data) => {
       if (!data || data.trim() === "") {
-        console.warn(`File ${filename} is empty or invalid, using default users.`);
+        console.warn(
+          `File ${filename} is empty or invalid, using default users.`
+        );
         return users;
       }
       const parsedData = JSON.parse(data);
@@ -47,10 +34,9 @@ const readFileWithPromise = (filename) => {
     });
 };
 
-readFileWithPromise(FILE_PATH1)
-  .then((usersData) => {
-    console.log("Queue data initialized 1:", usersData);
-  });
+readFileWithPromise(FILE_PATH1).then((usersData) => {
+  console.log("Queue data initialized 1:", usersData);
+});
 
 /**
  * Читає список користувачів з файлу і додає нових до масиву users.
@@ -68,10 +54,10 @@ const readUsersFromFile = (callback) => {
     try {
       // Парсимо JSON із файлу
       const fileUsers = JSON.parse(data || "[]");
-      
+
       // Додаємо користувачів з файлу до масиву
       users.push(...fileUsers);
-      
+
       console.log("Масив users ПІСЛЯ зчитування:", users);
       callback(null, users);
     } catch (parseErr) {
@@ -97,7 +83,4 @@ readUsersFromFile((err, data) => {
 const getUserById = (id) => users.find((u) => u.id === id);
 
 // Експортуємо функції для використання в інших модулях
-export {
-  readUsersFromFile,
-  getUserById
-};
+export { readUsersFromFile, getUserById };
