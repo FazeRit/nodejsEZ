@@ -315,3 +315,65 @@ export const closeQueue = async (queueId, owner_id) => {
     client.release();
   }
 };
+
+/**
+ * Передає права власника черги іншому користувачу.
+ * @param {number} queueId - Ідентифікатор черги.
+ * @param {number} currentOwnerId - Ідентифікатор поточного власника.
+ * @param {number} newOwnerId - Ідентифікатор нового власника.
+ * @returns {Promise<Object|null>} Оновлений об’єкт черги або null у разі помилки.
+ */
+export const transferQueueOwnership = async (queueId, currentOwnerId, newOwnerId) => {
+  if (
+    !Number.isInteger(Number(queueId)) ||
+    !Number.isInteger(Number(currentOwnerId)) ||
+    !Number.isInteger(Number(newOwnerId))
+  ) {
+    console.log("Некоректний queueId, currentOwnerId або newOwnerId:", { queueId, currentOwnerId, newOwnerId });
+    return null;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Перевірка, чи існує черга та чи поточний власник має права
+    const queueCheck = await client.query(
+      "SELECT owner_id FROM queues WHERE id = $1 FOR UPDATE",
+      [queueId]
+    );
+    if (queueCheck.rows.length === 0) {
+      throw new Error("Чергу не знайдено");
+    }
+    if (queueCheck.rows[0].owner_id !== currentOwnerId) {
+      throw new Error("Немає прав для передачі власності");
+    }
+
+    // Перевірка, чи новий власник існує (проста перевірка через таблицю people)
+    const userCheck = await client.query("SELECT id FROM people WHERE id = $1", [newOwnerId]);
+    if (userCheck.rows.length === 0) {
+      throw new Error("Нового власника не знайдено");
+    }
+
+    // Оновлення власника черги
+    const res = await client.query(
+      "UPDATE queues SET owner_id = $1 WHERE id = $2 RETURNING *",
+      [newOwnerId, queueId]
+    );
+
+    if (res.rows.length === 0) {
+      throw new Error("Не вдалося оновити власника черги");
+    }
+
+    // Підтвердження транзакції
+    await client.query("COMMIT");
+    console.log("Власність черги успішно передана:", res.rows[0]);
+    return res.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.log("Помилка при передачі власності черги:", error.message);
+    return null;
+  } finally {
+    client.release();
+  }
+};
