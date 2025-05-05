@@ -1,5 +1,5 @@
 import * as queueService from "../services/queueService.js";
-import * as userRepository from "../repositories/userRepository.js";
+import * as userRepo from "../repositories/userRepository.js";
 
 /**
  * Обробляє GET /queues: Відображає список усіх черг.
@@ -12,7 +12,7 @@ export const getAllQueues = async (req, res) => {
     const queues = await queueService.getAllQueues();
     res.render("queues", { queues });
   } catch (error) {
-    console.error("Помилка при отриманні списку черг:", error);
+    console.error("Error fetching queues:", error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -25,20 +25,18 @@ export const getAllQueues = async (req, res) => {
  */
 export const getQueueById = async (req, res) => {
   try {
-    const queue = await queueService.getQueueById(parseInt(req.params.id));
-    if (queue) {
-      const owner = await userRepository.getUserById(queue.owner_id);
-      const queueList = await Promise.all(
-        queue.queue_list.map(
-          async (userId) => await userRepository.getUserById(userId)
-        )
-      );
-      res.render("queue", { queue, owner, queue_list: queueList });
-    } else {
-      res.status(404).send("Queue not found");
+    const id = parseInt(req.params.id, 10);
+    const queue = await queueService.getQueueById(id);
+    if (!queue) {
+      return res.status(404).send("Queue not found");
     }
+    const owner = await userRepo.getUserById(queue.owner_id);
+    const queueUsers = await Promise.all(
+      queue.queue_list.map((uid) => userRepo.getUserById(uid))
+    );
+    res.render("queue", { queue, owner, queue_list: queueUsers });
   } catch (error) {
-    console.error("Помилка при отриманні черги:", error);
+    console.error(`Error fetching queue ${req.params.id}:`, error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -47,12 +45,23 @@ export const getQueueById = async (req, res) => {
  * Обробляє POST /queues: Створює нову чергу та перенаправляє на список черг.
  * @param {Object} req - Об’єкт запиту Express із name та owner_id у body.
  * @param {Object} res - Об’єкт відповіді Express.
- * @returns {void} Перенаправляє на '/queues'.
+ * @returns {void} Перенаправляє на '/'.
  */
-export const createQueue = (req, res) => {
-  const { name, ownerId: owner_id } = req.body;
-  queueService.createQueue(name, parseInt(owner_id));
-  res.redirect("/");
+export const createQueue = async (req, res) => {
+  try {
+    const { name, ownerId } = req.body;
+    const queue = await queueService.createQueue({
+      name,
+      owner_id: parseInt(ownerId, 10),
+    });
+    if (!queue) {
+      return res.status(400).send("Failed to create queue");
+    }
+    res.redirect("/");
+  } catch (error) {
+    console.error("Error creating queue:", error);
+    res.status(500).send("Internal Server Error");
+  }
 };
 
 /**
@@ -61,14 +70,18 @@ export const createQueue = (req, res) => {
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
  */
-export const joinQueue = (req, res) => {
-  const queueId = parseInt(req.params.id);
-  const { userId } = req.body;
-  const success = queueService.joinQueue(queueId, parseInt(userId));
-  if (success) {
-    res.redirect(`/${queueId}`);
-  } else {
-    res.status(400).send("Failed to join the queue");
+export const joinQueue = async (req, res) => {
+  try {
+    const queueId = parseInt(req.params.id, 10);
+    const userId = parseInt(req.body.userId, 10);
+    const success = await queueService.joinQueue(queueId, userId);
+    if (success) {
+      return res.redirect(`/${queueId}`);
+    }
+    res.status(400).send("Failed to join queue");
+  } catch (error) {
+    console.error("Error joining queue:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -78,14 +91,18 @@ export const joinQueue = (req, res) => {
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Рендерить шаблон 'position' або повертає 404, якщо користувача немає в черзі.
  */
-export const getUserPosition = (req, res) => {
-  const queueId = parseInt(req.params.id);
-  const userId = parseInt(req.query.userId);
-  const position = queueService.getUserPosition(queueId, userId);
-  if (position !== null) {
-    res.render("position", { position });
-  } else {
-    res.status(404).send("User not found in queue");
+export const getUserPosition = async (req, res) => {
+  try {
+    const queueId = parseInt(req.params.id, 10);
+    const userId = parseInt(req.query.userId, 10);
+    const pos = await queueService.getUserPosition(queueId, userId);
+    if (pos === null) {
+      return res.status(404).send("User not in queue");
+    }
+    res.render("position", { position: pos });
+  } catch (error) {
+    console.error("Error getting user position:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -96,24 +113,21 @@ export const getUserPosition = (req, res) => {
  * @returns {void} Повертає ім’я наступного користувача або 400 у разі помилки.
  */
 export const nextInQueue = async (req, res) => {
-  const queueId = parseInt(req.params.id);
-  const { ownerId: owner_id } = req.body;
-
   try {
-    const result = await queueService.nextInQueue(queueId, parseInt(owner_id));
-    if (result && result.nextUser) {
-      const nextUser = await userRepository.getUserById(result.nextUser);
-      if (nextUser) {
-        res.send(`Next user: ${nextUser.name}`);
-      } else {
-        res.status(404).send("Next user not found");
-      }
-    } else {
-      res.status(400).send("Failed to call next user");
+    const queueId = parseInt(req.params.id, 10);
+    const ownerId = parseInt(req.body.ownerId, 10);
+    const result = await queueService.nextInQueue(queueId, ownerId);
+    if (!result) {
+      return res.status(400).send("Failed to advance queue");
     }
+    const nextUser = await userRepo.getUserById(result.nextUser + 1);
+    if (!nextUser) {
+      return res.status(404).send("Next user not found");
+    }
+    res.send(`Next user: ${nextUser.name}`);
   } catch (error) {
-    console.log("Error in nextInQueue controller:", error.message);
-    res.status(500).send("Internal server error");
+    console.error("Error advancing queue:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -123,19 +137,23 @@ export const nextInQueue = async (req, res) => {
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
  */
-export const removeUserFromQueue = (req, res) => {
-  const queueId = parseInt(req.params.id);
-  const userId = parseInt(req.params.userId);
-  const { owner_id } = req.body;
-  const success = queueService.removeUserFromQueue(
-    queueId,
-    userId,
-    parseInt(owner_id)
-  );
-  if (success) {
-    res.redirect(`/${queueId}`);
-  } else {
+export const removeUserFromQueue = async (req, res) => {
+  try {
+    const queueId = parseInt(req.params.id, 10);
+    const userId = parseInt(req.params.userId, 10);
+    const ownerId = parseInt(req.body.ownerId, 10);
+    const success = await queueService.removeUserFromQueue(
+      queueId,
+      userId,
+      ownerId
+    );
+    if (success) {
+      return res.redirect(`/${queueId}`);
+    }
     res.status(400).send("Failed to remove user");
+  } catch (error) {
+    console.error("Error removing user from queue:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -145,13 +163,17 @@ export const removeUserFromQueue = (req, res) => {
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Перенаправляє на сторінку черги або повертає 400 у разі помилки.
  */
-export const closeQueue = (req, res) => {
-  const queueId = parseInt(req.params.id);
-  const { ownerId: owner_id } = req.body;
-  const success = queueService.closeQueue(queueId, parseInt(owner_id));
-  if (success) {
-    res.redirect(`/${queueId}`);
-  } else {
+export const closeQueue = async (req, res) => {
+  try {
+    const queueId = parseInt(req.params.id, 10);
+    const ownerId = parseInt(req.body.ownerId, 10);
+    const success = await queueService.closeQueue(queueId, ownerId);
+    if (success) {
+      return res.redirect(`/${queueId}`);
+    }
     res.status(400).send("Failed to close queue");
+  } catch (error) {
+    console.error("Error closing queue:", error);
+    res.status(500).send("Internal Server Error");
   }
 };
