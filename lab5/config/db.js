@@ -5,29 +5,35 @@ dotenv.config();
 
 let sequelize;
 
-if (process.env.DB_URL) {
-  sequelize = new Sequelize(process.env.DB_URL.toString(), {
+const dbConfig = {
+  url: process.env.DB_URL,
+  name: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  ssl: {
+    require: true,
+    rejectUnauthorized: false,
+  },
+};
+
+if (dbConfig.url) {
+  sequelize = new Sequelize(dbConfig.url.toString(), {
     dialect: "postgres",
     logging: false,
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl: dbConfig.ssl,
     },
   });
 } else {
-  const { DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT } = process.env;
-  sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-    host: DB_HOST,
-    port: DB_PORT,
+  sequelize = new Sequelize(dbConfig.name, dbConfig.user, dbConfig.password, {
+    host: dbConfig.host,
+    port: dbConfig.port,
     dialect: "postgres",
     logging: false,
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl: dbConfig.ssl,
     },
   });
 }

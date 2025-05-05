@@ -23,8 +23,8 @@ export const getQueueById = (id) => {
  * @param {number} owner_id - Ідентифікатор власника черги.
  * @returns {Promise<Object|null>} Новий об’єкт черги або null у разі помилки.
  */
-export const createQueue = ({ name, owner_id }) => {
-  return queueRepo.createQueue({ name, owner_id });
+export const createQueue = (data) => {
+  return queueRepo.createQueue(data);
 };
 
 /**
@@ -74,7 +74,8 @@ export const nextInQueue = async (queueId, owner_id) => {
   const updatedQueue = await queueRepo.updateQueue(queueId, {
     queue_list: rest,
   });
-  return updatedQueue ? { nextUser, updatedQueue } : null;
+  const data = { nextUser, updatedQueue };
+  return updatedQueue ? data : null;
 };
 
 /**
@@ -94,7 +95,7 @@ export const removeUserFromQueue = async (queueId, userId, owner_id) => {
   const updated = await queueRepo.updateQueue(queueId, {
     queue_list: filteredList,
   });
-  return !!updated;
+  return Boolean(updated);
 };
 
 /**
@@ -105,10 +106,17 @@ export const removeUserFromQueue = async (queueId, userId, owner_id) => {
  */
 export const closeQueue = async (queueId, owner_id) => {
   const queue = await queueRepo.getQueueById(queueId);
-  if (!queue || queue.owner_id !== owner_id || queue.is_closed) return false;
+
+  const queueNotFound = !queue;
+  const notOwner = queue?.owner_id !== owner_id;
+  const alreadyClosed = queue?.is_closed;
+
+  const shouldAbort = queueNotFound || notOwner || alreadyClosed;
+  if (shouldAbort) return false;
 
   const updated = await queueRepo.updateQueue(queueId, { is_closed: true });
-  return !!updated;
+
+  return Boolean(updated);
 };
 
 /**
