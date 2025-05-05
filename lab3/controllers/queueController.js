@@ -40,7 +40,7 @@ export const getQueueById = (req, res) => {
 export const createQueue = (req, res) => {
   const { name, ownerId } = req.body;
   queueService.createQueue(name, parseInt(ownerId));
-  res.redirect("/queues");
+  res.redirect("/");
 };
 
 /**
@@ -54,7 +54,7 @@ export const joinQueue = (req, res) => {
   const { userId } = req.body;
   const success = queueService.joinQueue(queueId, parseInt(userId));
   if (success) {
-    res.redirect(`/queues/${queueId}`);
+    res.redirect(`/${queueId}`);
   } else {
     res.status(400).send("Failed to join the queue");
   }
@@ -111,7 +111,7 @@ export const removeUserFromQueue = (req, res) => {
     parseInt(ownerId)
   );
   if (success) {
-    res.redirect(`/queues/${queueId}`);
+    res.redirect(`/${queueId}`);
   } else {
     res.status(400).send("Failed to remove user");
   }
@@ -128,7 +128,7 @@ export const closeQueue = (req, res) => {
   const { ownerId } = req.body;
   const success = queueService.closeQueue(queueId, parseInt(ownerId));
   if (success) {
-    res.redirect(`/queues/${queueId}`);
+    res.redirect(`/${queueId}`);
   } else {
     res.status(400).send("Failed to close queue");
   }

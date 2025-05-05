@@ -1,21 +1,35 @@
-<h1><%= queue.name %></h1>
-<p>Власник: <%= owner.name %></p>
-<p>Статус: <%= queue.is_closed ? 'Закрита' : 'Відкрита' %></p>
-<h2>Список у черзі</h2>
-<ul>
-  <% queue_list.forEach(user => { %>
-  <li><%= user.name %></li>
-  <% }) %>
-</ul>
-<form action="/queues/<%= queue.id %>/join" method="post">
-  <input type="text" name="userId" placeholder="ID користувача" />
-  <button type="submit">Приєднатися до черги</button>
-</form>
-<form action="/queues/<%= queue.id %>/next" method="post">
-  <input type="text" name="owner_id" placeholder="ID власника" />
-  <button type="submit">Наступний</button>
-</form>
-<form action="/queues/<%= queue.id %>/close" method="post">
-  <input type="text" name="owner_id" placeholder="ID власника" />
-  <button type="submit">Закрити чергу</button>
-</form>
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Черги</title>
+    <link rel="stylesheet" href="/css/queue.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1><%= queue.name %></h1>
+    <p>Власник: <%= owner.name %></p>
+    <p>Статус: <%= queue.is_closed ? 'Закрита' : 'Відкрита' %></p>
+    <h2>Список у черзі</h2>
+    <ul>
+      <% queue_list.forEach(user => { %>
+      <li><%= user.name %></li>
+      <% }) %>
+    </ul>
+    <form action="/<%= queue.id %>/join" method="post">
+      <input type="text" name="userId" placeholder="ID користувача" />
+      <button type="submit">Приєднатися до черги</button>
+    </form>
+    <form action="/<%= queue.id %>/next" method="post">
+      <input type="text" name="ownerId" placeholder="ID власника" />
+      <button type="submit">Наступний</button>
+    </form>
+    <form action="/<%= queue.id %>/close" method="post">
+      <input type="text" name="ownerId" placeholder="ID власника" />
+      <button type="submit">Закрити чергу</button>
+    </form>
+  </body>
+</html>
