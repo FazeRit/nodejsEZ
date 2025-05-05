@@ -95,7 +95,7 @@ export const getUserPosition = (req, res) => {
  * @param {Object} res - Об’єкт відповіді Express.
  * @returns {void} Повертає ім’я наступного користувача або 400 у разі помилки.
  */
-export const nextInQueue = (req, res) => {
+export const nextInQueue = async (req, res) => {
   const queueId = parseInt(req.params.id);
   const { ownerId: owner_id } = req.body;
 

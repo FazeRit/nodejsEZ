@@ -1,46 +1,41 @@
-/**
- * @fileoverview Шар репозиторію для даних користувачів у системі "Електронна черга".
- *
- * @description
- * Цей модуль надає методи доступу до даних користувачів. Використовується асинхронне читання з файлу users.json
- * з використанням функцій зворотного виклику (callbacks). Дані зберігаються в масиві users.
- *
- * Властивості користувача:
- * - id: Унікальний ідентифікатор.
- * - name: Ім’я користувача.
- *
- * @module repositories/userRepository
- *
- * @author [Potapenko Eldar]
- * @date 16-03-2025
- */
 import pool from "../config/db.js";
 
 /**
  * Отримує всіх користувачів.
- * @returns {Promise<Array>} Список усіх користувачів.
+ * @returns {Promise<Array>} Список усіх користувачів або порожній масив у разі помилки.
  */
 export const getAllUsers = async () => {
+  const client = await pool.connect();
   try {
-    const res = await pool.query("SELECT * FROM people");
+    const res = await client.query("SELECT * FROM people");
     return res.rows;
   } catch (error) {
-    console.error("Помилка при отриманні всіх користувачів:", error);
-    throw error;
+    console.log("Помилка при отриманні всіх користувачів:", error.message);
+    return [];
+  } finally {
+    client.release();
   }
 };
 
 /**
  * Отримує користувача за його ID.
  * @param {number} id - Ідентифікатор користувача.
- * @returns {Promise<Object|null>} Об’єкт користувача, якщо знайдено, інакше null.
+ * @returns {Promise<Object|null>} Об’єкт користувача, якщо знайдено, або null у разі помилки чи відсутності.
  */
 export const getUserById = async (id) => {
+  if (!Number.isInteger(Number(id))) {
+    console.log("Некоректний ID користувача:", id);
+    return null;
+  }
+
+  const client = await pool.connect();
   try {
-    const res = await pool.query("SELECT * FROM people WHERE id = $1", [id]);
+    const res = await client.query("SELECT * FROM people WHERE id = $1", [id]);
     return res.rows[0] || null;
   } catch (error) {
-    console.error("Помилка при отриманні користувача за ID:", error);
-    throw error;
+    console.log("Помилка при отриманні користувача за ID:", error.message);
+    return null;
+  } finally {
+    client.release();
   }
 };
