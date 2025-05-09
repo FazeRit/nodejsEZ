@@ -11,5 +11,6 @@ router.get("/:id/my-position", queueController.getUserPosition);
 router.post("/:id/next", queueController.nextInQueue);
 router.post("/:id/remove/:userId", queueController.removeUserFromQueue);
 router.post("/:id/close", queueController.closeQueue);
+router.post("/:id/delete", queueController.deleteQueue);
 
 export default router;
