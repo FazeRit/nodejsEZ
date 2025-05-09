@@ -9,9 +9,9 @@ Queue.belongsTo(User, { foreignKey: "owner_id", as: "owner" });
 (async () => {
   try {
     await sequelize.authenticate(); // Перевірка підключення
-    console.log("Підключення до бази даних Neon успішне");
+
     await sequelize.sync({ alter: true }); // Оновлює схему без втрати даних
-    console.log("Моделі синхронізовані з базою даних");
+
   } catch (error) {
     console.error("Помилка підключення або синхронізації з базою даних:", error);
   }
