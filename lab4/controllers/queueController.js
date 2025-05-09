@@ -155,3 +155,20 @@ export const closeQueue = (req, res) => {
     res.status(400).send("Failed to close queue");
   }
 };
+
+/**
+ * Обробляє POST /queues/:id/delete: Видаляє чергу (тільки власник).
+ * @param {Object} req - Об’єкт запиту Express із id черги в params та owner_id у body.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Перенаправляє на головну сторінку або повертає 400 у разі помилки.
+ */
+export const deleteQueue = (req, res) => {
+  const queueId = parseInt(req.params.id);
+  const { ownerId: owner_id } = req.body;
+  const success = queueService.deleteQueue(queueId, parseInt(owner_id));
+  if (success) {
+    res.redirect("/");
+  } else {
+    res.status(400).send("Failed to delete queue");
+  }
+};
