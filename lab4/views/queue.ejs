@@ -31,5 +31,9 @@
       <input type="text" name="ownerId" placeholder="ID власника" />
       <button type="submit">Закрити чергу</button>
     </form>
+    <form action="/<%= queue.id %>/delete" method="post">
+      <input type="text" name="ownerId" placeholder="ID власника" />
+      <button type="submit">Видалити чергу</button>
+    </form>
   </body>
 </html>

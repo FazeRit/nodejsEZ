@@ -11,14 +11,17 @@
   </head>
   <body>
     <h1>Черги</h1>
+    <% if (error) { %>
+      <p style="color: red;"><%= error %></p>
+    <% } %>
     <ul>
       <% queues.forEach(queue => { %>
-      <li><a href="/<%= queue.id %>"><%= queue.name %></a></li>
+        <li><a href="/<%= queue.id %>"><%= queue.name %></a></li>
       <% }) %>
     </ul>
     <form action="/" method="post">
-      <input type="text" name="name" placeholder="Назва черги" />
-      <input type="text" name="ownerId" placeholder="ID власника" />
+      <input type="text" name="name" placeholder="Назва черги" required />
+      <input type="text" name="ownerId" placeholder="ID власника" required />
       <button type="submit">Створити чергу</button>
     </form>
   </body>
