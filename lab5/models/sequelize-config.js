@@ -19,3 +19,15 @@ Queue.belongsTo(User, { foreignKey: "owner_id", as: "owner" });
 
 // Експорт sequelize для використання в інших файлах
 export { sequelize };
+
+const User = require('./user')(sequelize, DataTypes);
+const Queue = require('./queue')(sequelize, DataTypes);
+
+User.associate?.({ Queue });
+Queue.associate?.({ User });
+
+module.exports = {
+  User,
+  Queue,
+  sequelize,
+};
