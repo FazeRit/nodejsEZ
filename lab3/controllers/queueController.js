@@ -1,29 +1,3 @@
-/**
- * @fileoverview Шар контролерів для системи "Електронна черга".
- *
- * @description
- * Цей модуль обробляє HTTP-запити, пов’язані з управлінням чергами. Він взаємодіє з шаром сервісів для виконання операцій
- * і відображає сторінки через шаблони EJS для генерації HTML-відповідей на сервері.
- *
- * Реалізовані ендпоінти:
- * - GET /queues: Повертає список усіх черг.
- * - GET /queues/:id: Показує деталі конкретної черги.
- * - POST /queues: Створює нову чергу.
- * - POST /queues/:id/join: Дозволяє користувачу приєднатися до черги.
- * - GET /queues/:id/my-position: Показує позицію користувача в черзі.
- * - POST /queues/:id/next: Просуває чергу, видаляючи першого користувача (тільки власник).
- * - POST /queues/:id/remove/:userId: Видаляє конкретного користувача з черги (тільки власник).
- * - POST /queues/:id/close: Закриває чергу, забороняючи подальші приєднання (тільки власник).
- *
- * @module controllers/queueController
- *
- * @requires ../services/queueService.js - Сервісний шар для логіки управління чергами.
- * @requires ../repositories/userRepository.js - Репозиторій для доступу до даних користувачів.
- *
- * @author [Ваше Ім’я]
- * @date 2025-02-27
- */
-
 import * as queueService from "../services/queueService.js";
 import * as userRepository from "../repositories/userRepository.js";
 
@@ -66,7 +40,7 @@ export const getQueueById = (req, res) => {
 export const createQueue = (req, res) => {
   const { name, ownerId } = req.body;
   queueService.createQueue(name, parseInt(ownerId));
-  res.redirect("/queues");
+  res.redirect("/");
 };
 
 /**
@@ -80,7 +54,7 @@ export const joinQueue = (req, res) => {
   const { userId } = req.body;
   const success = queueService.joinQueue(queueId, parseInt(userId));
   if (success) {
-    res.redirect(`/queues/${queueId}`);
+    res.redirect(`/${queueId}`);
   } else {
     res.status(400).send("Failed to join the queue");
   }
@@ -137,7 +111,7 @@ export const removeUserFromQueue = (req, res) => {
     parseInt(ownerId)
   );
   if (success) {
-    res.redirect(`/queues/${queueId}`);
+    res.redirect(`/${queueId}`);
   } else {
     res.status(400).send("Failed to remove user");
   }
@@ -154,7 +128,7 @@ export const closeQueue = (req, res) => {
   const { ownerId } = req.body;
   const success = queueService.closeQueue(queueId, parseInt(ownerId));
   if (success) {
-    res.redirect(`/queues/${queueId}`);
+    res.redirect(`/${queueId}`);
   } else {
     res.status(400).send("Failed to close queue");
   }

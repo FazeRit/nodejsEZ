@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Позиція в черзі</title>
+    <link rel="stylesheet" href="/css/queues.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>Ваша позиція в черзі</h1>
+    <% if (error) { %>
+      <p style="color: red;"><%= error %></p>
+    <% } else { %>
+      <p>Ваша позиція: <%= position %></p>
+    <% } %>
+    <a href="/">Повернутися до списку черг</a>
+  </body>
+</html>

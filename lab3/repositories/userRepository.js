@@ -1,19 +1,3 @@
-/**
- * @fileoverview Шар репозиторію для даних користувачів у системі "Електронна черга".
- *
- * @description
- * Цей модуль надає методи доступу до даних користувачів. Використовується асинхронне читання з файлу users.json
- * з використанням функцій зворотного виклику (callbacks). Дані зберігаються в масиві users.
- *
- * Властивості користувача:
- * - id: Унікальний ідентифікатор.
- * - name: Ім’я користувача.
- *
- * @module repositories/userRepository
- *
- * @author [Potapenko Eldar]
- * @date 16-03-2025
- */
 import * as fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";

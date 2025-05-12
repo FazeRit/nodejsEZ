@@ -22,14 +22,22 @@ export const getAllQueues = async () => {
  * @param {number} id - Ідентифікатор черги.
  * @returns {Promise<Object|null>} Об’єкт черги або null у разі помилки чи відсутності.
  */
-export const getQueueById = async (id) => {
-  if (!Number.isInteger(Number(id))) {
-    console.log("Некоректний ID черги:", id);
-    return null;
-  }
+export const getQueueById = async (id, page, rowsPerPage) => {
+	if (!Number.isInteger(Number(id))) {
+		console.log("Некоректний ID черги:", id);
+		return null;
+	}
+	if (!Number.isInteger(Number(page))) {
+		console.log("Некоректна сторінка:", id);
+		return null;
+	}
+	if (!Number.isInteger(Number(rowsPerPage))) {
+		console.log("Некоректна кількість рядків на сторінці:", id);
+		return null;
+	}
   const client = await pool.connect();
   try {
-    const res = await client.query("SELECT * FROM queues WHERE id = $1", [id]);
+    const res = await client.;
     return res.rows[0] || null;
   } catch (error) {
     console.log("Помилка при отриманні черги:", error.message);
@@ -373,6 +381,54 @@ export const transferQueueOwnership = async (queueId, currentOwnerId, newOwnerId
     await client.query("ROLLBACK");
     console.log("Помилка при передачі власності черги:", error.message);
     return null;
+  } finally {
+    client.release();
+  }
+};
+
+
+/**
+ * Видаляє чергу, якщо запит від власника.
+ * @param {number} queueId - Ідентифікатор черги.
+ * @param {number} owner_id - Ідентифікатор власника черги.
+ * @returns {Promise<boolean>} True, якщо чергу видалено, або false у разі помилки.
+ */
+export const deleteQueue = async (queueId, owner_id) => {
+  if (
+    !Number.isInteger(Number(queueId)) ||
+    !Number.isInteger(Number(owner_id))
+  ) {
+    console.log("Некоректний queueId або owner_id:", { queueId, owner_id });
+    return false;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const queueCheck = await client.query(
+      "SELECT owner_id FROM queues WHERE id = $1 FOR UPDATE",
+      [queueId]
+    );
+    if (queueCheck.rows.length === 0) {
+      console.log("Чергу не знайдено:", queueId);
+      return false;
+    }
+    const { owner_id: queueOwnerId } = queueCheck.rows[0];
+    if (queueOwnerId !== owner_id) {
+      console.log("Немає прав для видалення черги:", { queueId, owner_id });
+      return false;
+    }
+
+    const res = await client.query(
+      "DELETE FROM queues WHERE id = $1",
+      [queueId]
+    );
+    await client.query("COMMIT");
+    return res.rowCount > 0;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.log("Помилка при видаленні черги:", error.message);
+    return false;
   } finally {
     client.release();
   }
