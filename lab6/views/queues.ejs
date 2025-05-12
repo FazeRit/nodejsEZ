@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Черги</title>
+    <link rel="stylesheet" href="/css/queues.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>Черги</h1>
+    
+    <form class="search-form" method="get" action="/">
+      <input
+        type="text"
+        name="q"
+        placeholder="Пошук за назвою черги"
+        value="<%- q || '' %>"
+      />
+      <button type="submit">Шукати</button>
+    </form>
+
+    <% if (error) { %>
+      <p class="error-message"><%= error %></p>
+    <% } %>
+
+    <ul>
+      <% if (queues.length === 0) { %>
+        <li class="empty-state">Немає черг для відображення</li>
+      <% } else { %>
+        <% queues.forEach(queue => { %>
+          <li><a href="/<%= queue.id %>"><%= queue.name %></a></li>
+        <% }) %>
+      <% } %>
+    </ul>
+
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <a
+          href="?page=<%= page - 1 %>&limit=<%= limit %>&q=<%= encodeURIComponent(q || '') %>"
+          class="<%= page === 1 ? 'disabled' : '' %>"
+        >
+          Попередня
+        </a>
+
+        <% for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) { %>
+          <a
+            href="?page=<%= i %>&limit=<%= limit %>&q=<%= encodeURIComponent(q || '') %>"
+            class="<%= i === page ? 'active' : '' %>"
+          >
+            <%= i %>
+          </a>
+        <% } %>
+
+        <a
+          href="?page=<%= page + 1 %>&limit=<%= limit %>&q=<%= encodeURIComponent(q || '') %>"
+          class="<%= page === totalPages ? 'disabled' : '' %>"
+        >
+          Наступна
+        </a>
+      </div>
+    <% } %>
+
+    <form action="/" method="post">
+      <input type="text" name="name" placeholder="Назва черги" required />
+      <input type="text" name="ownerId" placeholder="ID власника" required />
+      <button type="submit">Створити чергу</button>
+    </form>
+  </body>
+</html>

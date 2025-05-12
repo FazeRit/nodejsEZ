@@ -25,7 +25,11 @@ export const getAllQueues = async (req, res) => {
  */
 export const getQueueById = async (req, res) => {
   try {
+	const page = await (parseInt(req.query.page) || 1);
+	const rowsPerPage = await parseInt(req.query.rowsPerPage) || 10;
+
     const queue = await queueService.getQueueById(parseInt(req.params.id));
+
     if (queue) {
       const owner = await userRepository.getUserById(queue.owner_id);
       const queueList = await Promise.all(
