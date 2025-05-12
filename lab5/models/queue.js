@@ -33,3 +33,16 @@ Queue.init(
     timestamps: false,
   }
 );
+
+module.exports = (sequelize, DataTypes) => {
+  const Queue = sequelize.define("Queue", {
+    title: DataTypes.STRING,
+    status: DataTypes.STRING,
+  });
+
+  Queue.associate = (models) => {
+    Queue.belongsTo(models.User, { foreignKey: 'userId' });
+  };
+
+  return Queue;
+};
