@@ -208,3 +208,49 @@ export const deleteQueue = async (queueId, owner_id) => {
     return deleted;
   });
 };
+
+
+/**
+ * Переміщує користувача на початок черги транзакційно.
+ * @param {number} queueId - Ідентифікатор черги.
+ * @param {number} userId - Ідентифікатор користувача.
+ * @param {number} owner_id - Ідентифікатор власника черги.
+ * @returns {Promise<boolean>} True, якщо користувача переміщено, або false у разі помилки.
+ */
+export const moveUserToFront = async (queueId, userId, owner_id) => {
+  if (!Number.isInteger(queueId) || !Number.isInteger(userId) || !Number.isInteger(owner_id)) {
+    
+    return false; // Некоректні ID
+  }
+  return await sequelize.transaction(async (t) => {
+    const queue = await queueRepo.getQueueById(queueId, { transaction: t });
+    if (!queue || queue.owner_id !== owner_id) {
+      throw new Error("Чергу не знайдено або ви не є власником");
+    }
+    if (queue.is_closed) {
+      throw new Error("Черга закрита, переміщення неможливе");
+    }
+    const userIndex = queue.queue_list.indexOf(userId);
+    if (userIndex === -1) {
+      throw new Error("Користувача немає в черзі");
+    }
+    
+    // Видаляємо користувача зі списку
+    queue.queue_list.splice(userIndex, 1);
+    // Додаємо на початок
+    queue.queue_list.unshift(userId);
+    
+    // Оновлюємо чергу
+    const updated = await queueRepo.updateQueue(queueId, {
+      queue_list: queue.queue_list,
+    }, { transaction: t });
+    if (!updated) {
+      throw new Error("Не вдалося оновити чергу");
+    }
+
+    return true;
+  }).catch((error) => {
+
+    return false; // Транзакція відкочена
+  });
+};
