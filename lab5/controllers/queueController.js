@@ -300,3 +300,45 @@ export const deleteQueue = async (req, res) => {
     res.status(500).render("queue", { queue: null, owner: null, queue_list: [], error: "Внутрішня помилка сервера" });
   }
 };
+
+/**
+ * Обробляє POST /queues/:id/move-to-front: Переміщує користувача на початок черги (тільки власник).
+ * @param {Object} req - Об’єкт запиту Express із id черги у params, owner_id та userId у body.
+ * @param {Object} res - Об’єкт відповіді Express.
+ * @returns {void} Перенаправляє на сторінку черги або повертає помилку.
+ */
+export const moveUserToFront = async (req, res) => {
+  try {
+    const queueId = parseInt(req.params.id, 10);
+    if (isNaN(queueId)) {
+      return res.status(400).render("queue", { queue: null, owner: null, queue_list: [], error: "Некоректний ID черги" });
+    }
+    const userId = parseInt(req.body.userId, 10); // Змінено з req.params.userId
+    if (isNaN(userId)) {
+      return res.status(400).render("queue", { queue: await queueService.getQueueById(queueId), owner: null, queue_list: [], error: "Некоректний ID користувача" });
+    }
+    const ownerId = parseInt(req.body.ownerId, 10);
+    if (isNaN(ownerId)) {
+      return res.status(400).render("queue", { queue: await queueService.getQueueById(queueId), owner: null, queue_list: [], error: "Некоректний ID власника" });
+    }
+    const queue = await queueService.getQueueById(queueId);
+    if (!queue) {
+      return res.status(404).render("queue", { queue: null, owner: null, queue_list: [], error: "Чергу не знайдено" });
+    }
+    if (queue.owner_id !== ownerId) {
+      return res.status(403).render("queue", { queue, owner: await userRepo.getUserById(queue.owner_id), queue_list: [], error: "Дія дозволена лише власнику черги" });
+    }
+    const user = await userRepo.getUserById(userId);
+    if (!user) {
+      return res.status(404).render("queue", { queue, owner: await userRepo.getUserById(queue.owner_id), queue_list: [], error: "Користувача не знайдено" });
+    }
+    const success = await queueService.moveUserToFront(queueId, userId, ownerId);
+    if (!success) {
+      return res.status(400).render("queue", { queue, owner: await userRepo.getUserById(queue.owner_id), queue_list: [], error: "Не вдалося перемістити користувача: можливо, черга закрита або користувача немає в черзі" });
+    }
+    res.redirect(`/${queueId}`);
+  } catch (error) {
+    console.error("Error moving user to front of queue:", error);
+    res.status(500).render("queue", { queue: null, owner: null, queue_list: [], error: "Внутрішня помилка сервера" });
+  }
+};

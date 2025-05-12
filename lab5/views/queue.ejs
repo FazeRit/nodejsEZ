@@ -23,17 +23,26 @@
           <li><%= user.name %></li>
         <% }) %>
       </ul>
-      <form action="/<%= queue.id %>/join" method="post">
-        <input type="text" name="userId" placeholder="ID користувача" required />
-        <button type="submit">Приєднатися до черги</button>
-      </form>
+      <% if (!queue.is_closed) { %>
+        <form action="/<%= queue.id %>/join" method="post">
+          <input type="text" name="userId" placeholder="ID користувача" required />
+          <button type="submit">Приєднатися до черги</button>
+        </form>
+      <% } %>
       <form action="/<%= queue.id %>/next" method="post">
         <input type="text" name="ownerId" placeholder="ID власника" required />
         <button type="submit">Наступний</button>
       </form>
-      <form action="/<%= queue.id %>/close" method="post">
+      <% if (!queue.is_closed) { %>
+        <form action="/<%= queue.id %>/close" method="post">
+          <input type="text" name="ownerId" placeholder="ID власника" required />
+          <button type="submit">Закрити чергу</button>
+        </form>
+      <% } %>
+      <form action="/<%= queue.id %>/move-to-front" method="post">
         <input type="text" name="ownerId" placeholder="ID власника" required />
-        <button type="submit">Закрити чергу</button>
+        <input type="text" name="userId" placeholder="ID користувача для переміщення" required />
+        <button type="submit">Перемістити на початок</button>
       </form>
       <form action="/<%= queue.id %>/delete" method="post">
         <input type="text" name="ownerId" placeholder="ID власника" required />
