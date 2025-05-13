@@ -1,33 +1,28 @@
-import sequelize from "../config/db.js";
-import { Queue } from "./queue.js";
-import { User } from "./user.js";
+import sequelize from '../config/db.js';
+import { Queue } from './queue.js';
+import { User } from './user.js';
 
-// Налаштування асоціацій (зв’язків між моделями)
-Queue.belongsTo(User, { foreignKey: "owner_id", as: "owner" });
+Queue.belongsTo(User, {
+  foreignKey: 'owner_id',
+  as: 'owner',
+});
 
-// Синхронізація моделей із базою даних
+User.hasMany(Queue, {
+  foreignKey: 'owner_id',
+  as: 'queues',
+});
+
 (async () => {
   try {
-    await sequelize.authenticate(); // Перевірка підключення
+    await sequelize.authenticate();
+    console.log('Database connection established successfully.');
 
-    await sequelize.sync({ alter: true }); // Оновлює схему без втрати даних
-
+    await sequelize.sync({ alter: true });
+    console.log('Database schema synchronized.');
   } catch (error) {
-    console.error("Помилка підключення або синхронізації з базою даних:", error);
+    console.error('Error connecting to or synchronizing with the database:', error);
+    process.exit(1);
   }
 })();
 
-// Експорт sequelize для використання в інших файлах
-export { sequelize };
-
-const User = require('./user')(sequelize, DataTypes);
-const Queue = require('./queue')(sequelize, DataTypes);
-
-User.associate?.({ Queue });
-Queue.associate?.({ User });
-
-module.exports = {
-  User,
-  Queue,
-  sequelize,
-};
+export { User, Queue, sequelize };

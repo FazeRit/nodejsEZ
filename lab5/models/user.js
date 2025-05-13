@@ -22,7 +22,7 @@ User.init(
   }
 );
 
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const User = sequelize.define("User", {
     name: DataTypes.STRING,
     email: DataTypes.STRING,

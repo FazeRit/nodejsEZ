@@ -34,7 +34,7 @@ Queue.init(
   }
 );
 
-module.exports = (sequelize, DataTypes) => {
+export default  (sequelize, DataTypes) => {
   const Queue = sequelize.define("Queue", {
     title: DataTypes.STRING,
     status: DataTypes.STRING,
