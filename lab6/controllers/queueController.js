@@ -9,41 +9,54 @@ import * as userRepo from "../repositories/userRepository.js";
  */
 export const getAllQueues = async (req, res) => {
   try {
-    const { page = 1, limit = 10, q = "" } = req.query;
-    const { queues, totalPages } = await queueService.getFilteredQueues(
-      parseInt(page, 10),
-      parseInt(limit, 10),
-      q
-    );
+    // Parse query parameters with validation
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const q = req.query.q ? String(req.query.q).trim() : '';
 
-    if (!queues) {
-      return res.status(404).render("queues", {
+    // Validate page and limit
+    if (page < 1 || isNaN(page)) {
+      return res.status(400).render('queues', {
         queues: [],
-        error: "Черги не знайдені",
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
+        error: 'Номер сторінки має бути позитивним цілим числом',
+        page: 1,
+        limit,
+        totalPages: 0,
+        q,
+      });
+    }
+    if (limit < 1 || isNaN(limit)) {
+      return res.status(400).render('queues', {
+        queues: [],
+        error: 'Ліміт має бути позитивним цілим числом',
+        page,
+        limit: 10,
         totalPages: 0,
         q,
       });
     }
 
-    res.render("queues", {
-      queues,
-      totalPages,
+    // Fetch paginated and filtered queues
+    const { queues, totalPages } = await queueService.getFilteredQueues(page, limit, q);
+
+    // Render the template
+    res.render('queues', {
+      queues: queues || [], // Ensure queues is an array
+      totalPages: totalPages || 0,
       error: null,
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page,
+      limit,
       q,
     });
   } catch (error) {
-    console.error("Error fetching queues:", error);
-    res.status(500).render("queues", {
+    console.error('Error fetching queues:', error);
+    res.status(500).render('queues', {
       queues: [],
-      error: "Не вдалося отримати список черг",
+      error: 'Не вдалося отримати список черг',
       page: 1,
       limit: 10,
       totalPages: 0,
-      q: "",
+      q: '',
     });
   }
 };
