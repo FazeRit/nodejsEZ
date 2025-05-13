@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Черги</title>
+    <link rel="stylesheet" href="/css/queue.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1><%= queue ? queue.name : 'Черга' %></h1>
+    <% if (error) { %>
+      <p style="color: red;"><%= error %></p>
+    <% } %>
+    <% if (queue) { %>
+      <p>Власник: <%= owner ? owner.name : 'Невідомо' %></p>
+      <p>Статус: <%= queue.is_closed ? 'Закрита' : 'Відкрита' %></p>
+      <h2>Список у черзі</h2>
+      <ul>
+        <% queue_list.forEach(user => { %>
+          <li><%= user.name %></li>
+        <% }) %>
+      </ul>
+      <% if (!queue.is_closed) { %>
+        <form action="/<%= queue.id %>/join" method="post">
+          <input type="text" name="userId" placeholder="ID користувача" required />
+          <button type="submit">Приєднатися до черги</button>
+        </form>
+      <% } %>
+      <form action="/<%= queue.id %>/next" method="post">
+        <input type="text" name="ownerId" placeholder="ID власника" required />
+        <button type="submit">Наступний</button>
+      </form>
+      <% if (!queue.is_closed) { %>
+        <form action="/<%= queue.id %>/close" method="post">
+          <input type="text" name="ownerId" placeholder="ID власника" required />
+          <button type="submit">Закрити чергу</button>
+        </form>
+      <% } %>
+      <form action="/<%= queue.id %>/move-to-front" method="post">
+        <input type="text" name="ownerId" placeholder="ID власника" required />
+        <input type="text" name="userId" placeholder="ID користувача для переміщення" required />
+        <button type="submit">Перемістити на початок</button>
+      </form>
+      <form action="/<%= queue.id %>/delete" method="post">
+        <input type="text" name="ownerId" placeholder="ID власника" required />
+        <button type="submit">Видалити чергу</button>
+      </form>
+    <% } %>
+  </body>
+</html>

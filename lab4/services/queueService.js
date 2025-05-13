@@ -22,14 +22,22 @@ export const getAllQueues = async () => {
  * @param {number} id - Ідентифікатор черги.
  * @returns {Promise<Object|null>} Об’єкт черги або null у разі помилки чи відсутності.
  */
-export const getQueueById = async (id) => {
-  if (!Number.isInteger(Number(id))) {
-    console.log("Некоректний ID черги:", id);
-    return null;
-  }
+export const getQueueById = async (id, page, rowsPerPage) => {
+	if (!Number.isInteger(Number(id))) {
+		console.log("Некоректний ID черги:", id);
+		return null;
+	}
+	if (!Number.isInteger(Number(page))) {
+		console.log("Некоректна сторінка:", id);
+		return null;
+	}
+	if (!Number.isInteger(Number(rowsPerPage))) {
+		console.log("Некоректна кількість рядків на сторінці:", id);
+		return null;
+	}
   const client = await pool.connect();
   try {
-    const res = await client.query("SELECT * FROM queues WHERE id = $1", [id]);
+    const res = await client.;
     return res.rows[0] || null;
   } catch (error) {
     console.log("Помилка при отриманні черги:", error.message);
