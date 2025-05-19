@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Черга</title>
+  <link rel="stylesheet" href="./styles/queues.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="./api/api.js" defer></script>
+</head>
+<body>
+  <h1 id="queueName">Черга</h1>
+  <p class="error-message" id="errorMessage"></p>
+  <p id="ownerInfo">Власник: Невідомо</p>
+  <p id="statusInfo">Статус: </p>
+  <h2>Список у черзі</h2>
+  <ul id="queueList">
+  </ul>
+
+  <form id="joinForm" class="queue-action-form">
+    <input type="text" name="userId" placeholder="ID користувача" required />
+    <button type="submit">Приєднатися до черги</button>
+  </form>
+  <form id="nextForm" class="queue-action-form">
+    <input type="text" name="ownerId" placeholder="ID власника" required />
+    <button type="submit">Наступний</button>
+  </form>
+  <form id="closeForm" class="queue-action-form">
+    <input type="text" name="ownerId" placeholder="ID власника" required />
+    <button type="submit">Закрити чергу</button>
+  </form>
+  <form id="moveForm" class="queue-action-form">
+    <input type="text" name="ownerId" placeholder="ID власника" required />
+    <input type="text" name="userId" placeholder="ID користувача для переміщення" required />
+    <button type="submit">Перемістити на початок</button>
+  </form>
+  <form id="deleteForm" class="queue-action-form">
+    <input type="text" name="ownerId" placeholder="ID власника" required />
+    <button type="submit">Видалити чергу</button>
+  </form>
+
+  <a href="/">Повернутися до списку черг</a>
+</body>
+</html>

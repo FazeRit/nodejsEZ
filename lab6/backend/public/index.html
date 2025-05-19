@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Черги</title>
+  <link rel="stylesheet" href="./styles/queues.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="./api/api.js" defer></script>
+</head>
+<body>
+  <h1>Черги</h1>
+  
+  <form class="search-form" id="searchForm">
+    <input type="text" name="q" id="searchInput" placeholder="Пошук за назвою черги" />
+    <button type="submit">Шукати</button>
+  </form>
+
+  <p class="error-message" id="errorMessage"></p>
+
+  <ul id="queueList">
+    <li class="empty-state">Немає черг для відображення</li>
+  </ul>
+
+  <div class="pagination" id="pagination">
+  </div>
+
+  <form id="createForm">
+    <input type="text" name="name" placeholder="Назва черги" required />
+    <input type="text" name="ownerId" placeholder="ID власника" required />
+    <button type="submit">Створити чергу</button>
+  </form>
+</body>
+</html>
