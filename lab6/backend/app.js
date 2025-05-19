@@ -10,14 +10,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, config.viewsDir));
-
 app.use(express.static(path.join(__dirname, config.publicDir)));
 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/", queueRoutes);
+app.use("/queues", queueRoutes);
 
 app.listen(config.port, () => {
   console.log(`Server running at http://localhost:${config.port}`);
